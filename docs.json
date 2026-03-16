@@ -41,7 +41,7 @@
           {
             "group": "Get started",
             "pages": [
-              "introduction",
+              "index",
               "installation",
               "quickstart-cli"
             ]

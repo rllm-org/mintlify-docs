@@ -1,18 +1,18 @@
 ---
 title: Introduction to rLLM
-description: Open-source framework for post-training language agents via reinforcement learning
+description: Train your AI agents with RL. Any framework. Minimal code changes.
 ---
 
 <div align="center">
   <h1>rLLM</h1>
-  <p>Reinforcement Learning for Language Agents</p>
+  <p>Train your AI agents with RL. Any framework. Minimal code changes.</p>
 </div>
 
-rLLM is an open-source framework for post-training language agents via reinforcement learning. With rLLM, you can easily build custom agents and environments, train them with reinforcement learning, and deploy them for real-world workloads.
+rLLM is an open-source framework for training AI agents with reinforcement learning. Swap in a tracked client, define a reward function, and let RL handle the rest — no matter what agent framework you use.
 
 ## Why rLLM?
 
-rLLM makes it simple to create and train intelligent agents that can use tools, reason through complex problems, and improve their performance through reinforcement learning. The framework has powered state-of-the-art agents including:
+rLLM works with **any agent framework** — LangGraph, SmolAgents, Strands, OpenAI Agents SDK, Google ADK, or plain `openai.OpenAI`. Just swap the client. Add `@rllm.rollout` to wrap your agent code, and rLLM traces every LLM call automatically. The framework has powered state-of-the-art agents including:
 
 - **[rLLM-FinQA-4B](https://rllm-project.com/blog)**: A 4B financial analysis agent that outperforms Qwen3-235B (59.7% vs 51.4%) and rivals Gemini 2.5 Pro on Snorkel Finance Benchmark
 - **[DeepSWE](https://pretty-radio-b75.notion.site/DeepSWE-Training-a-Fully-Open-sourced-State-of-the-Art-by-Scaling-RL-22281902c1468193aabbe9a8c59bbe33)**: A 32B software engineering agent achieving 59% on SWEBench-Verified
@@ -37,8 +37,14 @@ rLLM is also used by a growing community of researchers and teams building on to
   <Card title="Terminal-Bench-RL" icon="terminal" href="/projects/terminal-bench-rl">
     Training long-horizon terminal agents with RL
   </Card>
+  <Card title="LLM-in-Sandbox" icon="box" href="/projects/llm-in-sandbox">
+    Building general agents by running LLMs in a sandbox
+  </Card>
   <Card title="Experiential RL" icon="brain" href="/projects/experiential-rl">
     Experience-reflection-consolidation training loop
+  </Card>
+  <Card title="Cogito, Ergo Ludo" icon="gamepad" href="/projects/cogito-ergo-ludo">
+    An agent that learns to play by reasoning and planning
   </Card>
 </CardGroup>
 
@@ -66,28 +72,28 @@ Datasets are auto-pulled from HuggingFace, agents and evaluators are resolved fr
 ## Key features
 
 <CardGroup cols={2}>
+  <Card title="Works with any agent framework" icon="plug">
+    LangGraph, SmolAgents, Strands, OpenAI Agents SDK, Google ADK, or plain `openai.OpenAI` — just swap the client
+  </Card>
+
+  <Card title="Near-zero code changes" icon="wand-magic-sparkles">
+    Add `@rllm.rollout` to wrap your agent code, and rLLM traces every LLM call automatically
+  </Card>
+
   <Card title="CLI-first workflow" icon="terminal">
-    Evaluate, train, and scaffold agents from the command line with sensible defaults and 50+ built-in benchmarks
+    Evaluate, train, and scaffold agents from the command line with 50+ built-in benchmarks
   </Card>
 
-  <Card title="Define custom agents and environments" icon="robot">
-    Build agents with tool usage capabilities and custom environments with reward functions tailored to your domain
+  <Card title="Battle-tested results" icon="chart-line">
+    rLLM-trained agents beat models 50x their size — 4B outperforms 235B on finance, 1.5B surpasses O1-Preview on math
   </Card>
 
-  <Card title="Unified trainer" icon="code">
-    Backend-agnostic training pipeline supporting both workflow classes and plain Python functions via SDK mode
+  <Card title="Multiple RL algorithms" icon="brain">
+    GRPO, REINFORCE, RLOO, rejection sampling, and more — pick the algorithm that fits your task
   </Card>
 
-  <Card title="Async parallelized trajectory generation" icon="rocket">
-    Efficient batch inference with parallel agent-environment execution for faster rollout generation
-  </Card>
-
-  <Card title="Scalable RL training" icon="chart-line">
-    Production-ready training with GRPO, REINFORCE, and RLOO algorithms, supporting verl and tinker backends
-  </Card>
-
-  <Card title="Framework integrations" icon="plug">
-    SDK support for LangGraph, SmolAgents, and Strands for building complex agentic workflows
+  <Card title="Two training backends" icon="server">
+    `verl` for distributed multi-GPU training, `tinker` for single-machine / CPU setups — same API either way
   </Card>
 
   <Card title="Advanced training features" icon="sparkles">
@@ -101,13 +107,15 @@ Datasets are auto-pulled from HuggingFace, agents and evaluators are resolved fr
 
 ## How it works
 
-rLLM provides a complete workflow for building and training language agents:
+rLLM follows a simple pipeline: **run your agent → collect traces → compute rewards → update the model**.
 
-1. **Define your agent**: Create agents with tool usage capabilities, custom prompts, and reasoning strategies
-2. **Build your environment**: Implement environments that provide tools, compute rewards, and manage agent interactions
-3. **Generate trajectories**: Use the AgentExecutionEngine to run agents in parallel and collect interaction data
-4. **Train with RL**: Improve agent performance using PPO or GRPO algorithms with scalable training backends
-5. **Deploy**: Export trained models and deploy them for inference in production workloads
+Your agent runs as-is — rLLM's SDK intercepts LLM calls and structures them into **Episodes** (one task) containing **Trajectories** (one agent run) made of **Steps** (one LLM call). A reward function scores the result, and the RL algorithm updates the model weights. The same agent code works for both eval and training.
+
+Under the hood:
+1. **Workflow Engine** runs N parallel agent instances to collect rollouts
+2. **LiteLLM Proxy** routes requests and captures token IDs + logprobs
+3. **Transform Pipeline** groups trajectories for advantage computation
+4. **Training Backend** (`verl` or `tinker`) handles the policy update
 
 ## Get started
 
